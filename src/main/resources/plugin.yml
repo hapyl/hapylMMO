@@ -1,0 +1,4 @@
+name: hapylMMO
+version: '${project.version}'
+main: me.hapyl.mmo.Main
+api-version: 1.19
