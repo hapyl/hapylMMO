@@ -1,23 +1,42 @@
 package me.hapyl.mmo;
 
+import me.hapyl.mmo.command.CommandRegistry;
 import me.hapyl.mmo.database.Database;
+import me.hapyl.mmo.event.PlayerEventHandler;
+import me.hapyl.mmo.player.PlayerManager;
 import me.hapyl.spigotutils.EternaAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Main extends JavaPlugin {
+import javax.annotation.Nonnull;
 
-    public static Main instance;
+public class Main extends JavaPlugin {
 
-    private Database database;
+    protected Database database;
+    protected PlayerManager playerManager;
 
     @Override
     public void onEnable() {
-        instance = this;
+        MMO.main = this;
 
         new EternaAPI(this);
 
+        // Load default config
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+
         // Initiate
         database = new Database(this);
+        playerManager = new PlayerManager(this);
+
+        // Load event handlers
+        new PlayerEventHandler(this);
+
+        // Register commands
+        new CommandRegistry(this);
+
+        // Reload player data >> /reload
+        Bukkit.getOnlinePlayers().forEach(MMO::getPlayer);
     }
 
     @Override
@@ -25,4 +44,10 @@ public final class Main extends JavaPlugin {
         database.saveAll();
         database.stopConnection();
     }
+
+    @Nonnull
+    public Database getDatabase() {
+        return database;
+    }
+
 }
